@@ -1,0 +1,169 @@
+\documentclass[12pt,reqno,final,pdftex]{amsart}
+%% DO NOT DELETE OR CHANGE THE FOLLOWING TWO LINES!
+%% $Revision$
+%% $Date$
+\usepackage[round,sort,elide]{natbib}
+\usepackage{graphicx}
+\usepackage{times}
+\usepackage{rotating}
+\usepackage{subfig}
+\usepackage{color}
+\newcommand{\aak}[1]{\textcolor{cyan}{#1}}
+\newcommand{\mab}[1]{\textcolor{red}{#1}}
+\newcommand{\cec}[1]{\textcolor{blue}{#1}}
+
+\setlength{\textwidth}{6.25in}
+\setlength{\textheight}{8.75in}
+\setlength{\evensidemargin}{0in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\topmargin}{-.35in}
+\setlength{\parskip}{.1in}
+\setlength{\parindent}{0.3in}
+
+%% cleveref must be last loaded package
+\usepackage[sort&compress]{cleveref}
+\newcommand{\crefrangeconjunction}{--}
+\crefname{figure}{Fig.}{Figs.}
+\Crefname{figure}{Fig.}{Figs.}
+\crefname{table}{Table}{Tables}
+\Crefname{table}{Tab.}{Tables}
+\crefname{equation}{Eq.}{Eqs.}
+\Crefname{equation}{Eq.}{Eqs.}
+\crefname{appendix}{Appendix}{Appendices}
+\Crefname{appendix}{Appendix}{Appendices}
+\creflabelformat{equation}{#2#1#3}
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}
+\newtheorem{corol}[thm]{Corollary}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{lemma}[thm]{Lemma}
+\newtheorem{defn}[thm]{Definition}
+\newtheorem{hyp}[thm]{Hypothesis}
+\newtheorem{example}[thm]{Example}
+\newtheorem{conj}[thm]{Conjecture}
+\newtheorem{algorithm}[thm]{Algorithm}
+\newtheorem{remark}{Remark}
+\renewcommand\thethm{\arabic{thm}}
+\renewcommand{\theremark}{}
+
+\numberwithin{equation}{part}
+\renewcommand\theequation{\arabic{equation}}
+\renewcommand\thesection{\arabic{section}}
+\renewcommand\thesubsection{\thesection.\arabic{subsection}}
+\renewcommand\thefigure{\arabic{figure}}
+\renewcommand\thetable{\arabic{table}}
+\renewcommand\thefootnote{\arabic{footnote}}
+
+\newcommand\scinot[2]{$#1 \times 10^{#2}$}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\pkg}[1]{\textsf{#1}}
+\newcommand{\dlta}[1]{{\Delta}{#1}}
+\newcommand{\Prob}[1]{\mathbb{P}\left[#1\right]}
+\newcommand{\Expect}[1]{\mathbb{E}\left[#1\right]}
+\newcommand{\Var}[1]{\mathrm{Var}\left[#1\right]}
+\newcommand{\dd}[1]{\mathrm{d}{#1}}
+\newcommand{\citetpos}[1]{\citeauthor{#1}'s \citeyearpar{#1}}
+
+\begin{document}
+
+<<setup,include=FALSE,cache=F>>=
+require(knitr)
+opts_chunk$set(
+               progress=T,prompt=F,tidy=F,highlight=T,
+               warning=F,message=F,error=F,
+               results='hide',echo=F,cache=T,
+               size='scriptsize',
+               fig.path='figure/',fig.lp="fig:",
+               fig.align='left',
+               fig.show='asis',
+               fig.height=4,fig.width=6.83,
+               out.width="\\linewidth",
+               dpi=150,
+               dev=c('png','tiff'),
+               dev.args=list(
+                 png=list(bg='transparent'),
+                 tiff=list(compression='lzw')
+                 )
+               )
+
+scinot <- function (x, digits = 2, type = c("expression","latex")) {
+  type <- match.arg(type)
+  x <- signif(x,digits=digits)
+  ch <- floor(log10(abs(x)))
+  mn <- x/10^ch
+  switch(type,
+         expression={
+           bquote(.(mn)%*%10^.(ch))
+         },
+         latex={
+           paste0("\\scinot{",mn,"}{",ch,"}")
+         }
+         )
+}
+
+require(xtable)
+
+options(scipen=-1)
+
+options(
+        xtable.caption.placement="top",
+        xtable.include.rownames=FALSE
+        )
+
+@
+
+\section*{Consumer-Resource Model}
+
+In the absence of parasitism, we assume that the consumer-resource interaction between the host ($S$) and its resource ($R$) can be modeled using the Rosenzweig-MacArthur (RM) model:
+
+\begin{align}
+\frac{dR(t)}{dt} &= r R(t) \left(1 - \frac{R(t)}{K}\right) - \frac{f_S R(t) S(t)}{h + R(t)}, \\
+\frac{dS(t)}{dt} &= \frac{\epsilon_S f_S R(t) S(t)}{h + R(t)} - d S(t).
+\end{align}
+
+The cogent feature of this model is its ability to produce either a stable equilibrium or stable limit cycles, depending on parameter values.
+In particular, as the carrying capacity of the resource, $K$, is increased, the system can transition from equilibrium to limit cycles, a result termed the ``paradox of enrichment.''
+
+\section*{Consumer-Resource-Parasite Model}
+Here, we study the evolution of parasite virulence in such a consumer-resource system.
+We are interested in two questions, in particular.
+First, under what biological assumptions does the evolutionarily stable virulence depend on host resources?
+Second, how is the evolutionarily stable virulence affected by consumer-resource dynamics?
+
+To begin, we augment the RM model by dividing the host population into susceptible ($S$) and infected ($Q$) classes, with transmission between classes dependent on contact between susceptible and infected classes.
+We assume that both susceptible and infected class forage at the same rate, and that all transmission is horizontal, so hosts are born susceptible.
+We also assume that infected hosts suffer additional mortality due to parasites at the per-capita rate $v$, so that $v$ is the virulence of the parasite.
+We assume a classic virulence-transmission trade-off, such that the transmission rate, $\beta$, is a function of $v$.
+Under these assumptions, the model becomes:
+\begin{align}\label{RSQ}
+\frac{dR(t)}{dt} &= r R(t) \left(1 - \frac{R(t)}{K}\right) - \frac{f_S R(t) (S(t)+Q(t))}{h + R(t)}, \\
+\frac{dS(t)}{dt} &= \frac{\epsilon_S f_S R(t) (S(t)+Q(t))}{h + R(t)} - \beta(v) S(t) Q(t)- d S(t), \\
+\frac{dQ(t)}{dt} &= \beta(v) S(t) Q(t) - (d + v)Q(t).
+\end{align}
+
+This model retains the dynamical properties of the standard RM model, including that increasing the value of $K$ will destabilize the dynamics.
+The additional mortality imposed by the parasite, however, has a positive effect on the stability of the system, in that the system becomes unstable at larger values of $K$.
+
+\subsection*{Virulence evolution}
+To study the evolution of virulence, we take an adaptive dynamics approach.
+To model \ref{RSQ} above, we add a second strain of parasite (the 'mutant', $Q_m$)  that is assumed to differ from the 'resident' strain in its virulence ($v_m$ for the mutant, compared to $v$ for the resident).
+The model then becomes:
+\begin{align}\label{RSQQm}
+\frac{dR(t)}{dt} &= r R(t) \left(1 - \frac{R(t)}{K}\right) - \frac{f_S R(t) (S(t)+Q(t)+Q_m(t))}{h + R(t)}, \\
+\frac{dS(t)}{dt} &= \frac{\epsilon_S f_S R(t) (S(t)+Q(t)+Q_m(t))}{h + R(t)} - \beta(v) S(t) Q(t) - \beta(v_m) S(t) Q_m(t)- d S(t), \\
+\frac{dQ(t)}{dt} &= \beta(v) S(t) Q(t) - (d + v)Q(t), \\
+\frac{dQ_m(t)}{dt} &= \beta(v_m) S(t) Q_m(t) - (d + v_m)Q_m(t).
+\end{align}
+Whether the mutant can invade the system is determined by the stability of the dynamical attractor of the system when $Q_m(t) = 0$.
+This stability can be assessed by studying the Jacobian matrix,
+J = \begin{pmatrix}
+\frac{\partial}{\partial R}\left(\frac{dR}{dt}\right) & \frac{\partial}{\partial S}\left(\frac{dR}{dt}\right) & \frac{\partial}{\partial Q}\left(\frac{dR}{dt}\right) & \frac{\partial}{\partial Q_m}\left(\frac{dR}{dt}\right) \\
+\frac{\partial}{\partial R}\left(\frac{dS}{dt}\right) & \frac{\partial}{\partial S}\left(\frac{dS}{dt}\right) & \frac{\partial}{\partial Q}\left(\frac{dS}{dt}\right) & \frac{\partial}{\partial Q_m}\left(\frac{dS}{dt}\right) \\
+\frac{\partial}{\partial R}\left(\frac{dQ}{dt}\right) & \frac{\partial}{\partial S}\left(\frac{dQ}{dt}\right) & \frac{\partial}{\partial Q}\left(\frac{dQ}{dt}\right) & \frac{\partial}{\partial Q_m}\left(\frac{dQ}{dt}\right) \\
+\frac{\partial}{\partial R}\left(\frac{dQ_m}{dt}\right) & \frac{\partial}{\partial S}\left(\frac{dQ_m}{dt}\right) & \frac{\partial}{\partial Q}\left(\frac{dQ_m}{dt}\right) & \frac{\partial}{\partial Q_m}\left(\frac{dQ_m}{dt}\right)
+\end{pmatrix}
+
+
+
+
